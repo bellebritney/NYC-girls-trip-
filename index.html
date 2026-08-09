@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>NYC Girls' Trip — Oct 2026</title>
+<meta name="theme-color" content="#FF6B5B" />
+<link rel="manifest" href="./manifest.json" />
+<link rel="icon" href="./icon-192.png" />
+<link rel="apple-touch-icon" href="./icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+<div class="hero">
+  <div class="sync-pill"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">Loading…</span></div>
+  <div class="hero-eyebrow">London → New York</div>
+  <h1>Girls' Trip, NYC</h1>
+  <div class="hero-sub">
+    <span class="hero-stat">8–18 Oct 2026</span>
+    <span class="hero-stat">5 of you</span>
+    <span class="hero-stat">Trip code: <span id="tripCodeLabel">…</span></span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ============ NOW ============ -->
+  <div class="view active" id="view-now">
+    <div class="now-hero">
+      <div class="eyebrow" style="color:#fff; opacity:.85">Right now</div>
+      <h2 style="color:#fff">What should we do?</h2>
+      <div class="muted" id="nowHeroNote" style="color:#fff; opacity:.9; margin-top:4px">Tap a mood to see what's close and open.</div>
+      <button class="btn secondary" style="margin-top:14px; background:rgba(255,255,255,0.25); color:#fff" onclick="locateMe()">📍 Use my location</button>
+    </div>
+    <div class="chip-row" id="moodChips">
+      <button class="chip active" data-mood="All" onclick="setMood('All')">All</button>
+      <button class="chip" data-mood="dinner" onclick="setMood('dinner')">Hungry</button>
+      <button class="chip" data-mood="cocktails" onclick="setMood('cocktails')">Drinks</button>
+      <button class="chip" data-mood="dancing" onclick="setMood('dancing')">Dancing</button>
+      <button class="chip" data-mood="coffee" onclick="setMood('coffee')">Coffee</button>
+      <button class="chip" data-mood="sightseeing" onclick="setMood('sightseeing')">Sightsee</button>
+      <button class="chip" data-mood="dessert" onclick="setMood('dessert')">Dessert</button>
+    </div>
+    <div id="nowList"></div>
+  </div>
+
+  <!-- ============ ITINERARY ============ -->
+  <div class="view" id="view-itinerary">
+    <div class="section-title">Day by day</div>
+    <div id="itineraryList"></div>
+  </div>
+
+  <!-- ============ PLACES ============ -->
+  <div class="view" id="view-places">
+    <div class="section-title">All the spots</div>
+    <input class="search-box" placeholder="Search by name or neighbourhood…" oninput="onPlaceSearch(this.value)" />
+    <div class="chip-row" id="placeChips" style="margin-top:10px"></div>
+    <div id="placesList"></div>
+    <button class="btn" style="margin-top:8px" onclick="openAddPlace()">+ Add a place</button>
+  </div>
+
+  <!-- ============ BUDGET ============ -->
+  <div class="view" id="view-budget">
+    <div class="section-title">Budget</div>
+    <div class="budget-hero">
+      <div class="row" style="align-items:flex-start">
+        <div>
+          <div class="muted" style="color:rgba(255,255,255,0.75)">Total budget (editable)</div>
+          <div class="budget-total">£<input type="number" id="budgetTotalInput" value="1000" style="width:110px; background:transparent; border:none; color:#fff; font:inherit; padding:0" onchange="updateBudgetTotal(this.value)" /></div>
+        </div>
+        <div style="text-align:right">
+          <div id="budgetTotalDisplay" style="display:none"></div>
+          <div class="muted" id="budgetSpentDisplay" style="color:rgba(255,255,255,0.85)"></div>
+        </div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="budgetProgressFill" style="width:0%"></div></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:4px">By category</h3>
+      <div id="budgetCats"></div>
+    </div>
+    <button class="btn" onclick="openAddExpense()">+ Log an expense</button>
+    <div class="section-title" style="font-size:18px">Recent expenses</div>
+    <div id="expenseList"></div>
+  </div>
+
+  <!-- ============ PACKING ============ -->
+  <div class="view" id="view-packing">
+    <div class="section-title">Packing list</div>
+    <div class="muted" style="margin:0 4px 12px">Shared checklist — ticks sync for everyone.</div>
+    <div id="packingList"></div>
+  </div>
+
+  <!-- ============ INFO ============ -->
+  <div class="view" id="view-info">
+    <div class="section-title">Trip info</div>
+
+    <div class="card info-block">
+      <h3>✈ Flights</h3>
+      <div class="info-line"><span>Outbound</span><span>8 Oct · LGW → JFK · lands 15:55</span></div>
+      <div class="info-line"><span>Return</span><span>18 Oct · JFK → LGW · 18:20–06:20</span></div>
+      <div class="info-line"><span>Hotel</span><span>Radio Hotel, 2420 Amsterdam Ave</span></div>
+      <div class="muted" style="margin-top:8px">Airport mode: allow ~1hr from Washington Heights to JFK, plus 3hrs before an international departure.</div>
+    </div>
+
+    <div class="card info-block">
+      <h3>🚕 Getting around</h3>
+      <div id="infoTransport"></div>
+    </div>
+
+    <div class="card info-block">
+      <h3>💵 Money & tipping</h3>
+      <div id="infoMoney"></div>
+    </div>
+
+    <div class="card info-block">
+      <h3>🚨 Emergency</h3>
+      <div id="infoEmergency"></div>
+    </div>
+
+    <div class="card info-block">
+      <h3>🗺️ Directions app</h3>
+      <div class="muted" style="margin-bottom:8px">Choose which app "Directions" buttons open, on this device.</div>
+      <div class="chip-row" id="mapsAppChips">
+        <button class="chip active" data-app="google" onclick="setMapsApp('google')">Google Maps</button>
+        <button class="chip" data-app="apple" onclick="setMapsApp('apple')">Apple Maps</button>
+        <button class="chip" data-app="citymapper" onclick="setMapsApp('citymapper')">Citymapper</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ TAB BAR ============ -->
+<div class="tabbar">
+  <button class="tab-btn active" data-tab="now" onclick="switchTab('now')"><span class="tab-icon">✨</span>Now</button>
+  <button class="tab-btn" data-tab="itinerary" onclick="switchTab('itinerary')"><span class="tab-icon">🗓️</span>Plan</button>
+  <button class="tab-btn" data-tab="places" onclick="switchTab('places')"><span class="tab-icon">📍</span>Places</button>
+  <button class="tab-btn" data-tab="budget" onclick="switchTab('budget')"><span class="tab-icon">💸</span>Budget</button>
+  <button class="tab-btn" data-tab="packing" onclick="switchTab('packing')"><span class="tab-icon">🧳</span>Pack</button>
+  <button class="tab-btn" data-tab="info" onclick="switchTab('info')"><span class="tab-icon">ℹ️</span>Info</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============ MODALS ============ -->
+<div class="modal-backdrop" id="swapModal" style="display:none" onclick="if(event.target===this)closeModal('swapModal')">
+  <div class="modal"><div class="modal-handle"></div>
+    <h3 style="margin-bottom:10px">Swap for…</h3>
+    <div id="swapOptions"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="moveModal" style="display:none" onclick="if(event.target===this)closeModal('moveModal')">
+  <div class="modal"><div class="modal-handle"></div>
+    <h3 style="margin-bottom:10px">Move to which day?</h3>
+    <div id="moveOptions"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="addBlockModal" style="display:none" onclick="if(event.target===this)closeModal('addBlockModal')">
+  <div class="modal"><div class="modal-handle"></div>
+    <h3>Add to this day</h3>
+    <form id="addBlockForm" onsubmit="submitAddBlock(event)">
+      <label>Time</label><input type="time" name="time" value="12:00" />
+      <label>What</label><input type="text" name="name" placeholder="e.g. Bar Pisellino" required />
+      <label>Category</label>
+      <select name="category">
+        <option>Breakfast</option><option>Brunch</option><option>Lunch</option><option>Dinner</option>
+        <option>Dessert</option><option>Cocktails</option><option>Nightlife</option><option>Coffee</option>
+        <option>Sightseeing</option><option>Shopping</option><option>Rest</option><option>Flex</option>
+      </select>
+      <label>Note (optional)</label><textarea name="note" rows="2"></textarea>
+      <button class="btn" style="margin-top:14px" type="submit">Add</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="addPlaceModal" style="display:none" onclick="if(event.target===this)closeModal('addPlaceModal')">
+  <div class="modal"><div class="modal-handle"></div>
+    <h3>Add a place</h3>
+    <form id="addPlaceForm" onsubmit="submitAddPlace(event)">
+      <label>Name</label><input type="text" name="name" required />
+      <label>Category</label>
+      <select name="category">
+        <option>Breakfast</option><option>Brunch</option><option>Lunch</option><option>Dinner</option>
+        <option>Dessert</option><option>Cocktails</option><option>Nightlife</option><option>Coffee</option>
+        <option>Sightseeing</option><option>Shopping</option><option>Takeaway</option>
+      </select>
+      <label>Neighbourhood</label><input type="text" name="neighborhood" />
+      <label>Address</label><input type="text" name="address" />
+      <label>Price</label>
+      <select name="price"><option>$</option><option>$$</option><option>$$$</option><option>$$$$</option></select>
+      <label>Why go</label><textarea name="why" rows="2"></textarea>
+      <button class="btn" style="margin-top:14px" type="submit">Add place</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="addExpenseModal" style="display:none" onclick="if(event.target===this)closeModal('addExpenseModal')">
+  <div class="modal"><div class="modal-handle"></div>
+    <h3>Log an expense</h3>
+    <form id="addExpenseForm" onsubmit="submitAddExpense(event)">
+      <label>What</label><input type="text" name="label" required />
+      <label>Amount</label><input type="number" step="0.01" name="amount" required />
+      <label>Currency</label>
+      <select name="currency"><option value="GBP">£ GBP</option><option value="USD">$ USD</option></select>
+      <label>Category</label><select name="category"></select>
+      <label>Status</label>
+      <select name="status"><option value="paid">Paid</option><option value="committed">Committed, not paid</option></select>
+      <button class="btn" style="margin-top:14px" type="submit">Log it</button>
+    </form>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="./firebase-config.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
